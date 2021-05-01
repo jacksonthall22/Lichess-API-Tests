@@ -2,6 +2,7 @@ import requests
 import json
 from typing import *
 import sqlite3
+import discord
 
 
 DB_NAME = 'users.db'
@@ -13,7 +14,6 @@ def exec_db_cmd(con: sqlite3.Connection, cmd_str: str):
     ''' Database Setup '''
 
     cur = con.cursor()
-
 
     ''' Command Functions '''
 
@@ -41,7 +41,7 @@ def exec_db_cmd(con: sqlite3.Connection, cmd_str: str):
         if not users:
             return 0, f'\tThere are no users in the database.'
 
-        return 0, f'\tCurrent users: {", ".join([e[0] for e in users])}'
+        return 0, '\tCurrent users:' + ''.join(['\n\t\t'+ e[0] for e in users])
 
     def remove(name: str) -> Tuple[int, str]:
         for c in name:
@@ -70,11 +70,6 @@ def exec_db_cmd(con: sqlite3.Connection, cmd_str: str):
 
     COMMANDS = [
         {
-            'name': ['help'],
-            'desc': 'Print this help message.',
-            'func': help_,
-        },
-        {
             'name': ['add'],
             'desc': 'Add a user to the database (ex. `add Cubigami`).',
             'func': add_,
@@ -94,6 +89,11 @@ def exec_db_cmd(con: sqlite3.Connection, cmd_str: str):
             'desc': 'Done adding and removing names.',
             'func': exit_,
         },
+        {
+            'name': ['help'],
+            'desc': 'Print this help message.',
+            'func': help_,
+        },
     ]
 
     tokens = cmd_str.strip().split()
@@ -103,11 +103,11 @@ def exec_db_cmd(con: sqlite3.Connection, cmd_str: str):
         if tokens[0] in e['name']:
             try:
                 # Call the function in the dict. This function should validate
-                # tokens[1:] and print its own error msg describing why they 
+                # tokens[1:] and print its own error msg describing if they 
                 # cannot be parsed
                 code, result = e['func'](*tokens[1:])
             except TypeError as e_:
-                return 0, f'\tError: Couldn\'t parse arguments for {e["name"]}().'
+                return 0, f'\tError: Couldn\'t parse arguments for {tokens[0]}().'
 
             # Successful execution
             return code, result
@@ -142,7 +142,7 @@ def main():
             print(result)
 
     print()
-    print('-----')
+    print('----')
     print()
 
     # Show all items in the database
@@ -181,7 +181,7 @@ the user to add, remove, and view them, and then calls a Lichess API endpoint to
 players in the database are online. This is the start of a Discord bot for the UVM Chess Club \
 server that will be able to post chat messages when server members go online on Lichess.''')
     print()
-    print('-----')
+    print('----')
     print()
 
 
